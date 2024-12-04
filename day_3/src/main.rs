@@ -7,7 +7,8 @@ fn main()
 
     let formatted_puzzle_input = format_for_puzzle(file_content);
     
-    let total_valid_memory = extract_and_perform_calcs(formatted_puzzle_input);
+//    let total_valid_memory = extract_and_perform_calcs(formatted_puzzle_input);
+    let total_valid_memory = programmatic_calculations(formatted_puzzle_input);
 
     println!("The total value from the invalid memory is {}.", &total_valid_memory);
 }
@@ -32,6 +33,39 @@ fn format_for_puzzle(input: String) -> Vec<String>
     return input.lines()
         .map(|x| String::from(x))
         .collect();
+}
+
+fn programmatic_calculations(input: Vec<String>) -> i32
+{
+    let re = Regex::new(r"mul\(\d+,\d+\)|don't\(\)|do\(\)").unwrap();
+    let mut sum = 0;
+    let mut do_apply = true;
+    
+    for line in input
+    {
+        let matches: Vec<&str> = re.find_iter(&line)
+            .map(|x| x.as_str())
+            .map(|x| x.trim())
+            .collect();
+
+        for mat in matches
+        {
+            if mat.eq("don't()")
+            {
+                do_apply = false;
+            }
+            else if mat.eq("do()")
+            {
+                do_apply = true;
+            }
+            else if do_apply
+            {
+                sum += extract_numbers(mat).0 * extract_numbers(mat).1;
+            }
+        }
+    }
+
+    return sum;
 }
 
 fn extract_and_perform_calcs(input: Vec<String>) -> i32
